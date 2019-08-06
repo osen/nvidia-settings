@@ -469,7 +469,11 @@ ReturnStatus NvCtrlNvmlQueryTargetCount(const CtrlTarget *ctrl_target,
      * NVML (Keep TARGET_TYPE_IS_NVML_COMPATIBLE in NvCtrlAttributesPrivate.h up
      * to date).
      */
-    assert(TARGET_TYPE_IS_NVML_COMPATIBLE(target_type));
+   //
+   // 
+   // 
+   // 
+   // //assert(TARGET_TYPE_IS_NVML_COMPATIBLE(target_type));
 
     if ((h == NULL) || (h->nvml == NULL)) {
         return NvCtrlBadHandle;
@@ -578,7 +582,7 @@ ReturnStatus NvCtrlNvmlGetStringAttribute(const CtrlTarget *ctrl_target,
      * NVML (Keep TARGET_TYPE_IS_NVML_COMPATIBLE in NvCtrlAttributesPrivate.h up
      * to date).
      */
-    assert(TARGET_TYPE_IS_NVML_COMPATIBLE(NvCtrlGetTargetType(ctrl_target)));
+   // //assert(TARGET_TYPE_IS_NVML_COMPATIBLE(NvCtrlGetTargetType(ctrl_target)));
 
     switch (NvCtrlGetTargetType(ctrl_target)) {
         case GPU_TARGET:
@@ -672,7 +676,7 @@ ReturnStatus NvCtrlNvmlSetStringAttribute(CtrlTarget *ctrl_target,
      * NVML (Keep TARGET_TYPE_IS_NVML_COMPATIBLE in NvCtrlAttributesPrivate.h up
      * to date).
      */
-    assert(TARGET_TYPE_IS_NVML_COMPATIBLE(NvCtrlGetTargetType(ctrl_target)));
+    //assert(TARGET_TYPE_IS_NVML_COMPATIBLE(NvCtrlGetTargetType(ctrl_target)));
 
     switch (NvCtrlGetTargetType(ctrl_target)) {
         case GPU_TARGET:
@@ -1111,7 +1115,7 @@ ReturnStatus NvCtrlNvmlGetAttribute(const CtrlTarget *ctrl_target,
      * NVML (Keep TARGET_TYPE_IS_NVML_COMPATIBLE in NvCtrlAttributesPrivate.h up
      * to date).
      */
-    assert(TARGET_TYPE_IS_NVML_COMPATIBLE(NvCtrlGetTargetType(ctrl_target)));
+    //assert(TARGET_TYPE_IS_NVML_COMPATIBLE(NvCtrlGetTargetType(ctrl_target)));
 
     switch (NvCtrlGetTargetType(ctrl_target)) {
         case GPU_TARGET:
@@ -1144,7 +1148,7 @@ ReturnStatus NvCtrlNvmlGetGridLicenseAttributes(const CtrlTarget *ctrl_target,
      * NVML (Keep TARGET_TYPE_IS_NVML_COMPATIBLE in NvCtrlAttributesPrivate.h up
      * to date).
      */
-    assert(TARGET_TYPE_IS_NVML_COMPATIBLE(NvCtrlGetTargetType(ctrl_target)));
+    //assert(TARGET_TYPE_IS_NVML_COMPATIBLE(NvCtrlGetTargetType(ctrl_target)));
 
     if (NvCtrlGetTargetType(ctrl_target) == GPU_TARGET) {
         return NvCtrlNvmlGetGridLicensableFeatures(ctrl_target, attr, val);
@@ -1212,6 +1216,7 @@ static ReturnStatus NvCtrlNvmlSetGPUAttribute(CtrlTarget *ctrl_target,
     printNvmlError(ret);
     return NvCtrlNotSupported;
 }
+#endif
 
 static ReturnStatus NvCtrlNvmlSetCoolerAttribute(CtrlTarget *ctrl_target,
                                                  int attr, int val)
@@ -1264,7 +1269,7 @@ static ReturnStatus NvCtrlNvmlSetCoolerAttribute(CtrlTarget *ctrl_target,
     return NvCtrlNotSupported;
 }
 
-#endif // NVML_EXPERIMENTAL
+//#endif // NVML_EXPERIMENTAL
 
 ReturnStatus NvCtrlNvmlSetAttribute(CtrlTarget *ctrl_target, int attr,
                                     int index, int val)
@@ -1273,13 +1278,13 @@ ReturnStatus NvCtrlNvmlSetAttribute(CtrlTarget *ctrl_target, int attr,
         return NvCtrlMissingExtension;
     }
 
-#ifdef NVML_EXPERIMENTAL
+//#ifdef NVML_EXPERIMENTAL
     /*
      * This should't be reached for target types that are not handled through
      * NVML (Keep TARGET_TYPE_IS_NVML_COMPATIBLE in NvCtrlAttributesPrivate.h up
      * to date).
      */
-    assert(TARGET_TYPE_IS_NVML_COMPATIBLE(NvCtrlGetTargetType(ctrl_target)));
+    //assert(TARGET_TYPE_IS_NVML_COMPATIBLE(NvCtrlGetTargetType(ctrl_target)));
 
     switch (NvCtrlGetTargetType(ctrl_target)) {
         case GPU_TARGET:
@@ -1298,9 +1303,9 @@ ReturnStatus NvCtrlNvmlSetAttribute(CtrlTarget *ctrl_target, int attr,
             return NvCtrlBadHandle;
     }
 
-#else
-    return NvCtrlNotSupported;
-#endif
+//#else
+//    return NvCtrlNotSupported;
+//#endif
 }
 
 
@@ -1377,7 +1382,7 @@ NvCtrlNvmlGetBinaryAttribute(const CtrlTarget *ctrl_target,
      * NVML (Keep TARGET_TYPE_IS_NVML_COMPATIBLE in NvCtrlAttributesPrivate.h up
      * to date).
      */
-    assert(TARGET_TYPE_IS_NVML_COMPATIBLE(NvCtrlGetTargetType(ctrl_target)));
+    //assert(TARGET_TYPE_IS_NVML_COMPATIBLE(NvCtrlGetTargetType(ctrl_target)));
 
     switch (NvCtrlGetTargetType(ctrl_target)) {
         case GPU_TARGET:
@@ -1465,7 +1470,7 @@ NvCtrlNvmlGetValidStringAttributeValues(const CtrlTarget *ctrl_target,
      * NVML (Keep TARGET_TYPE_IS_NVML_COMPATIBLE in NvCtrlAttributesPrivate.h up
      * to date).
      */
-    assert(TARGET_TYPE_IS_NVML_COMPATIBLE(NvCtrlGetTargetType(ctrl_target)));
+    //assert(TARGET_TYPE_IS_NVML_COMPATIBLE(NvCtrlGetTargetType(ctrl_target)));
 
     switch (NvCtrlGetTargetType(ctrl_target)) {
         case GPU_TARGET:
@@ -1498,7 +1503,7 @@ NvCtrlNvmlGetValidStringAttributeValues(const CtrlTarget *ctrl_target,
 
         ret2 = NvCtrlNvControlGetValidStringDisplayAttributeValues(h, 0, attr, val);
 
-        assert(ret2 == NvCtrlAttributeNotAvailable);
+        //assert(ret2 == NvCtrlAttributeNotAvailable);
 
         return ret2;
     }
@@ -1748,7 +1753,7 @@ NvCtrlNvmlGetValidAttributeValues(const CtrlTarget *ctrl_target,
      * NVML (Keep TARGET_TYPE_IS_NVML_COMPATIBLE in NvCtrlAttributesPrivate.h up
      * to date).
      */
-    assert(TARGET_TYPE_IS_NVML_COMPATIBLE(NvCtrlGetTargetType(ctrl_target)));
+    //assert(TARGET_TYPE_IS_NVML_COMPATIBLE(NvCtrlGetTargetType(ctrl_target)));
 
     switch (NvCtrlGetTargetType(ctrl_target)) {
         case GPU_TARGET:
@@ -1788,7 +1793,7 @@ NvCtrlNvmlGetValidAttributeValues(const CtrlTarget *ctrl_target,
 
         ret2 = NvCtrlNvControlGetValidAttributeValues(h, 0, attr, val);
 
-        assert(ret2 == NvCtrlAttributeNotAvailable);
+       // //assert(ret2 == NvCtrlAttributeNotAvailable);
 
         return ret2;
     }

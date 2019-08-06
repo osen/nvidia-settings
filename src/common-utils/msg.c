@@ -127,9 +127,9 @@ void nv_error_msg(const char *fmt, ...)
 {
     if (__verbosity < NV_VERBOSITY_ERROR) return;
 
-    format(stderr, NULL, "", TRUE);
-    NV_FORMAT(stderr, "ERROR: ", fmt, TRUE);
-    format(stderr, NULL, "", TRUE);
+//    format(stderr, NULL, "", TRUE);
+//    NV_FORMAT(stderr, "ERROR: ", fmt, TRUE);
+//    format(stderr, NULL, "", TRUE);
 } /* nv_error_msg() */
 
 
@@ -143,10 +143,10 @@ void nv_error_msg(const char *fmt, ...)
 void nv_deprecated_msg(const char *fmt, ...)
 {
     if (__verbosity < NV_VERBOSITY_DEPRECATED) return;
-
-    format(stderr, NULL, "", TRUE);
-    NV_FORMAT(stderr, "DEPRECATED: ", fmt, TRUE);
-    format(stderr, NULL, "", TRUE);
+//
+//    format(stderr, NULL, "", TRUE);
+//    NV_FORMAT(stderr, "DEPRECATED: ", fmt, TRUE);
+//    format(stderr, NULL, "", TRUE);
 }
 
 
@@ -161,9 +161,9 @@ void nv_warning_msg(const char *fmt, ...)
 {
     if (__verbosity < NV_VERBOSITY_WARNING) return;
 
-    format(stderr, NULL, "", TRUE);
-    NV_FORMAT(stderr, "WARNING: ", fmt, TRUE);
-    format(stderr, NULL, "", TRUE);
+//    format(stderr, NULL, "", TRUE);
+//    NV_FORMAT(stderr, "WARNING: ", fmt, TRUE);
+//    format(stderr, NULL, "", TRUE);
 } /* nv_warning_msg() */
 
 
@@ -178,7 +178,7 @@ void nv_info_msg(const char *prefix, const char *fmt, ...)
 {
     if (__verbosity < NV_VERBOSITY_ALL) return;
 
-    NV_FORMAT(stdout, prefix, fmt, TRUE);
+//    NV_FORMAT(stdout, prefix, fmt, TRUE);
 } /* nv_info_msg() */
 
 
@@ -192,7 +192,7 @@ void nv_info_msg_to_file(FILE *stream, const char *prefix, const char *fmt, ...)
 {
     if (__verbosity < NV_VERBOSITY_ALL) return;
 
-    NV_FORMAT(stream, prefix, fmt, TRUE);
+//    NV_FORMAT(stream, prefix, fmt, TRUE);
 } /* nv_info_msg_to_file() */
 
 
@@ -206,7 +206,7 @@ void nv_info_msg_to_file(FILE *stream, const char *prefix, const char *fmt, ...)
 
 void nv_msg(const char *prefix, const char *fmt, ...)
 {
-    NV_FORMAT(stdout, prefix, fmt, TRUE);
+//    NV_FORMAT(stdout, prefix, fmt, TRUE);
 } /* nv_msg() */
 
 
@@ -218,7 +218,7 @@ void nv_msg(const char *prefix, const char *fmt, ...)
 
 void nv_msg_preserve_whitespace(const char *prefix, const char *fmt, ...)
 {
-    NV_FORMAT(stdout, prefix, fmt, FALSE);
+//    NV_FORMAT(stdout, prefix, fmt, FALSE);
 } /* nv_msg_preserve_whitespace() */
 
 
