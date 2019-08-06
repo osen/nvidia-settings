@@ -843,11 +843,7 @@ ReturnStatus NvCtrlSetDisplayAttribute(CtrlTarget *ctrl_target,
                                                  attr,
                                                  display_mask,
                                                  val);
-                    if ((ret != NvCtrlMissingExtension) &&
-                        (ret != NvCtrlBadHandle) &&
-                        (ret != NvCtrlNotSupported)) {
-                        return ret;
-                    }
+                    return ret;
                 }
                 /* Fall through */
             case DISPLAY_TARGET:
