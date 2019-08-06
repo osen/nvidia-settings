@@ -24,6 +24,7 @@
 #ifndef __NVCTRL_H
 #define __NVCTRL_H
 
+
 #include <stdint.h>
 
 /**************************************************************************/
@@ -42,8 +43,7 @@
 #define NV_CTRL_TARGET_TYPE_X_SCREEN       0
 #define NV_CTRL_TARGET_TYPE_GPU            1
 #define NV_CTRL_TARGET_TYPE_FRAMELOCK      2
-/* Visual Computing System - deprecated.  To be removed along with all
- * VCS-specific attributes in a later release. */
+/* Visual Computing System - no longer supported. */
 #define NV_CTRL_TARGET_TYPE_VCSC           3
 #define NV_CTRL_TARGET_TYPE_GVI            4
 #define NV_CTRL_TARGET_TYPE_COOLER         5 /* e.g., fan */
@@ -94,9 +94,6 @@
  * X: When Xinerama is enabled, this attribute is kept consistent across
  *    all Physical X Screens;  assignment of this attribute will be
  *    broadcast by the NVIDIA X Driver to all X Screens.
- *
- * V: The attribute may be queried using an NV_CTRL_TARGET_TYPE_VCSC
- *    target type via XNVCTRLQueryTargetAttribute().
  *
  * I: The attribute may be queried using an NV_CTRL_TARGET_TYPE_GVI target type
  *    via XNVCTRLQueryTargetAttribute().
@@ -2172,15 +2169,10 @@
 
 
 /*
- * NV_CTRL_VCSC_HIGH_PERF_MODE - deprecated
- *
- * Is used to both query High Performance Mode status on the Visual Computing
- * System, and also to enable or disable High Performance Mode.
+ * NV_CTRL_VCSC_HIGH_PERF_MODE - Not supported
  */
 
-#define NV_CTRL_VCSC_HIGH_PERF_MODE                             282 /* RW-V */
-#define NV_CTRL_VCSC_HIGH_PERF_MODE_DISABLE                       0
-#define NV_CTRL_VCSC_HIGH_PERF_MODE_ENABLE                        1
+#define NV_CTRL_VCSC_HIGH_PERF_MODE                             282
 
 /*
  * NV_CTRL_DISPLAYPORT_LINK_RATE - returns the negotiated lane bandwidth of the
@@ -3289,13 +3281,24 @@
 #define NV_CTRL_VIDEO_ENCODER_UTILIZATION                       407 /* R--G */
 
 /*
- * NV_CTRL_GSYNC_ALLOWED - when TRUE, OpenGL will enable G-SYNC when possible;
- * when FALSE, OpenGL will always use a fixed monitor refresh rate.
+ * NV_CTRL_VRR_ALLOWED - when TRUE, OpenGL will enable G-SYNC and Adaptive-Sync
+ * when possible; when FALSE, OpenGL will always use a fixed monitor refresh
+ * rate.
  */
 
-#define NV_CTRL_GSYNC_ALLOWED                                   408 /* RW-X */
-#define NV_CTRL_GSYNC_ALLOWED_FALSE                               0
-#define NV_CTRL_GSYNC_ALLOWED_TRUE                                1
+#define NV_CTRL_VRR_ALLOWED                                     408 /* RW-X */
+#define NV_CTRL_VRR_ALLOWED_FALSE                                 0
+#define NV_CTRL_VRR_ALLOWED_TRUE                                  1
+
+/*
+ * NV_CTRL_GSYNC_ALLOWED - renamed
+ *
+ * NV_CTRL_VRR_ALLOWED should be used instead.
+ */
+
+#define NV_CTRL_GSYNC_ALLOWED         NV_CTRL_VRR_ALLOWED
+#define NV_CTRL_GSYNC_ALLOWED_FALSE   NV_CTRL_VRR_ALLOWED_FALSE
+#define NV_CTRL_GSYNC_ALLOWED_TRUE    NV_CTRL_VRR_ALLOWED_TRUE
 
 /*
  * NV_CTRL_GPU_NVCLOCK_OFFSET - This attribute controls the GPU clock offsets
@@ -3387,13 +3390,26 @@
 #define NV_CTRL_CURRENT_COLOR_RANGE_LIMITED                       1
 
 /*
- * NV_CTRL_SHOW_GSYNC_VISUAL_INDICATOR - when TRUE, OpenGL will indicate when
- * G-SYNC is in use for full-screen applications.
+ * NV_CTRL_SHOW_VRR_VISUAL_INDICATOR - when TRUE, OpenGL will indicate when
+ * G-SYNC or G-SYNC Compatible is in use for full-screen applications.
  */
 
-#define NV_CTRL_SHOW_GSYNC_VISUAL_INDICATOR                     416 /* RW-X */
-#define NV_CTRL_SHOW_GSYNC_VISUAL_INDICATOR_FALSE                 0
-#define NV_CTRL_SHOW_GSYNC_VISUAL_INDICATOR_TRUE                  1
+#define NV_CTRL_SHOW_VRR_VISUAL_INDICATOR                       416 /* RW-X */
+#define NV_CTRL_SHOW_VRR_VISUAL_INDICATOR_FALSE                   0
+#define NV_CTRL_SHOW_VRR_VISUAL_INDICATOR_TRUE                    1
+
+/*
+ * NV_CTRL_SHOW_GSYNC_VISUAL_INDICATOR - renamed
+ *
+ * NV_CTRL_SHOW_VRR_VISUAL_INDICATOR should be used instead.
+ */
+
+#define NV_CTRL_SHOW_GSYNC_VISUAL_INDICATOR \
+    NV_CTRL_SHOW_VRR_VISUAL_INDICATOR
+#define NV_CTRL_SHOW_GSYNC_VISUAL_INDICATOR_FALSE \
+    NV_CTRL_SHOW_VRR_VISUAL_INDICATOR_FALSE
+#define NV_CTRL_SHOW_GSYNC_VISUAL_INDICATOR_TRUE \
+    NV_CTRL_SHOW_VRR_VISUAL_INDICATOR_TRUE
 
 /*
  * NV_CTRL_THERMAL_COOLER_CURRENT_LEVEL - Returns cooler's current
@@ -3530,7 +3546,37 @@
 #define NV_CTRL_SHOW_GRAPHICS_VISUAL_INDICATOR_FALSE                   0
 #define NV_CTRL_SHOW_GRAPHICS_VISUAL_INDICATOR_TRUE                    1
 
-#define NV_CTRL_LAST_ATTRIBUTE NV_CTRL_SHOW_GRAPHICS_VISUAL_INDICATOR
+/*
+ * NV_CTRL_DISPLAY_VRR_MODE - Indicates whether the specified display device
+ * supports G-SYNC, G-SYNC Compatible (validated or unvalidated), or none of
+ * the above.
+ */
+
+#define NV_CTRL_DISPLAY_VRR_MODE                                     429 /* R-D- */
+#define NV_CTRL_DISPLAY_VRR_MODE_NONE                                  0
+#define NV_CTRL_DISPLAY_VRR_MODE_GSYNC                                 1
+#define NV_CTRL_DISPLAY_VRR_MODE_GSYNC_COMPATIBLE                      2
+#define NV_CTRL_DISPLAY_VRR_MODE_GSYNC_COMPATIBLE_UNVALIDATED          3
+
+/*
+ * NV_CTRL_DISPLAY_VRR_MIN_REFRESH_RATE - Indicates the minimum refresh rate for
+ * the specified VRR display device.
+ */
+
+#define NV_CTRL_DISPLAY_VRR_MIN_REFRESH_RATE                         430 /* R-D- */
+
+/*
+ * NV_CTRL_DISPLAY_VRR_ENABLED - Indicates whether the specified display
+ * device enabled VRR at modeset time, and is capable of VRR flipping if
+ * NV_CTRL_VRR_ALLOWED is set.  If this is FALSE, NV_CTRL_VRR_ALLOWED has no
+ * effect.
+ */
+
+#define NV_CTRL_DISPLAY_VRR_ENABLED                                  431 /* R-D- */
+#define NV_CTRL_DISPLAY_VRR_ENABLED_FALSE                              0
+#define NV_CTRL_DISPLAY_VRR_ENABLED_TRUE                               1
+
+#define NV_CTRL_LAST_ATTRIBUTE NV_CTRL_DISPLAY_VRR_ENABLED
 
 /**************************************************************************/
 
@@ -3700,100 +3746,59 @@
 
 
 /*
- * NV_CTRL_STRING_VCSC_PRODUCT_NAME - deprecated
- *
- * Queries the product name of the VCSC device.
- *
- * This attribute must be queried through XNVCTRLQueryTargetStringAttribute()
- * using a NV_CTRL_TARGET_TYPE_VCSC target.
+ * NV_CTRL_STRING_VCSC_PRODUCT_NAME - Not supported
  */
 
-#define NV_CTRL_STRING_VCSC_PRODUCT_NAME                       15   /* R---V */
+#define NV_CTRL_STRING_VCSC_PRODUCT_NAME                       15
 
 
 /*
- * NV_CTRL_STRING_VCSC_PRODUCT_ID - deprecated
- *
- * Queries the product ID of the VCSC device.
- *
- * This attribute must be queried through XNVCTRLQueryTargetStringAttribute()
- * using a NV_CTRL_TARGET_TYPE_VCSC target.
+ * NV_CTRL_STRING_VCSC_PRODUCT_ID - Not supported
  */
 
-#define NV_CTRL_STRING_VCSC_PRODUCT_ID                         16   /* R---V */
+#define NV_CTRL_STRING_VCSC_PRODUCT_ID                         16
 
 
 /*
- * NV_CTRL_STRING_VCSC_SERIAL_NUMBER - deprecated
- *
- * Queries the unique serial number of the VCS device.
- *
- * This attribute must be queried through XNVCTRLQueryTargetStringAttribute()
- * using a NV_CTRL_TARGET_TYPE_VCSC target.
+ * NV_CTRL_STRING_VCSC_SERIAL_NUMBER - Not supported
  */
 
-#define NV_CTRL_STRING_VCSC_SERIAL_NUMBER                      17   /* R---V */
+#define NV_CTRL_STRING_VCSC_SERIAL_NUMBER                      17
 
 
 /*
- * NV_CTRL_STRING_VCSC_BUILD_DATE - deprecated
- *
- * Queries the date of the VCS device.  the returned string is in the following
- * format: "Week.Year"
- *
- * This attribute must be queried through XNVCTRLQueryTargetStringAttribute()
- * using a NV_CTRL_TARGET_TYPE_VCSC target.
+ * NV_CTRL_STRING_VCSC_BUILD_DATE - Not supported
  */
 
-#define NV_CTRL_STRING_VCSC_BUILD_DATE                         18   /* R---V */
+#define NV_CTRL_STRING_VCSC_BUILD_DATE                         18
 
 
 /*
- * NV_CTRL_STRING_VCSC_FIRMWARE_VERSION - deprecated
- *
- * Queries the firmware version of the VCS device.
- *
- * This attribute must be queried through XNVCTRLQueryTargetStringAttribute()
- * using a NV_CTRL_TARGET_TYPE_VCSC target.
+ * NV_CTRL_STRING_VCSC_FIRMWARE_VERSION - Not supported
  */
 
-#define NV_CTRL_STRING_VCSC_FIRMWARE_VERSION                   19   /* R---V */
+#define NV_CTRL_STRING_VCSC_FIRMWARE_VERSION                   19
 
 
 /*
- * NV_CTRL_STRING_VCSC_FIRMWARE_REVISION - deprecated
- *
- * Queries the firmware revision of the VCS device.
- *
- * This attribute must be queried through XNVCTRLQueryTargetStringAttribute()
- * using a NV_CTRL_TARGET_TYPE_VCS target.
+ * NV_CTRL_STRING_VCSC_FIRMWARE_REVISION - Not supported
  */
 
-#define NV_CTRL_STRING_VCSC_FIRMWARE_REVISION                  20   /* R---V */
+#define NV_CTRL_STRING_VCSC_FIRMWARE_REVISION                  20
 
 
 /*
- * NV_CTRL_STRING_VCSC_HARDWARE_VERSION - deprecated
- *
- * Queries the hardware version of the VCS device.
- *
- * This attribute must be queried through XNVCTRLQueryTargetStringAttribute()
- * using a NV_CTRL_TARGET_TYPE_VCSC target.
+ * NV_CTRL_STRING_VCSC_HARDWARE_VERSION - Not supported
  */
 
-#define NV_CTRL_STRING_VCSC_HARDWARE_VERSION                   21   /* R---V */
+#define NV_CTRL_STRING_VCSC_HARDWARE_VERSION                   21
 
 
 /*
- * NV_CTRL_STRING_VCSC_HARDWARE_REVISION - deprecated
- *
- * Queries the hardware revision of the VCS device.
- *
- * This attribute must be queried through XNVCTRLQueryTargetStringAttribute()
- * using a NV_CTRL_TARGET_TYPE_VCSC target.
+ * NV_CTRL_STRING_VCSC_HARDWARE_REVISION - Not supported
  */
 
-#define NV_CTRL_STRING_VCSC_HARDWARE_REVISION                  22   /* R---V */
+#define NV_CTRL_STRING_VCSC_HARDWARE_REVISION                  22
 
 
 /* 
@@ -3997,85 +4002,24 @@
 
 
 /*
- * NV_CTRL_STRING_VCSC_FAN_STATUS - deprecated
- *
- * Returns a string with status of all the fans in the Visual Computing System,
- * if such a query is supported.  Fan information is reported along with its
- * tachometer reading (in RPM) and a flag indicating whether the fan has failed
- * or not.
- * 
- * Valid tokens:
- *
- *    Token      Value
- *   "fan"       integer   - the Fan index
- *   "speed"     integer   - the tachometer reading of the fan in rpm
- *   "fail"      integer   - flag to indicate whether the fan has failed
- *
- * Example:
- *
- *   fan=0, speed=694, fail=0 ; fan=1, speed=693, fail=0
- *
- * This attribute must be queried through XNVCTRLQueryTargetStringAttribute()
- * using a NV_CTRL_TARGET_TYPE_VCSC target.
- *
+ * NV_CTRL_STRING_VCSC_FAN_STATUS - Not supported
  */
 
-#define NV_CTRL_STRING_VCSC_FAN_STATUS                         30   /* R---V */
+#define NV_CTRL_STRING_VCSC_FAN_STATUS                         30
 
 
 /*
- * NV_CTRL_STRING_VCSC_TEMPERATURES - Deprecated
- *
- * Returns a string with all Temperature readings in the Visual Computing
- * System, if such a query is supported.  Intake, Exhaust and Board Temperature
- * values are reported in Celcius.
- * 
- * Valid tokens:
- *
- *    Token      Value
- *   "intake"    integer   - the intake temperature for the VCS
- *   "exhaust"   integer   - the exhaust temperature for the VCS
- *   "board"     integer   - the board temperature of the VCS
- *
- * Example:
- *
- *   intake=29, exhaust=46, board=41
- *
- * This attribute must be queried through XNVCTRLQueryTargetStringAttribute()
- * using a NV_CTRL_TARGET_TYPE_VCSC target.
- *
+ * NV_CTRL_STRING_VCSC_TEMPERATURES - Not supported
  */
 
-#define NV_CTRL_STRING_VCSC_TEMPERATURES                       31   /* R---V */
+#define NV_CTRL_STRING_VCSC_TEMPERATURES                       31
 
 
 /*
- * NV_CTRL_STRING_VCSC_PSU_INFO - Deprecated
- *
- * Returns a string with all Power Supply Unit related readings in the Visual
- * Computing System, if such a query is supported.  Current in amperes, Power
- * in watts, Voltage in volts and PSU state may be reported.  Not all PSU types
- * support all of these values, and therefore some readings may be unknown.
- * 
- * Valid tokens:
- *
- *    Token      Value
- *   "current"   integer   - the current drawn in amperes by the VCS
- *   "power"     integer   - the power drawn in watts by the VCS
- *   "voltage"   integer   - the voltage reading of the VCS
- *   "state"     integer   - flag to indicate whether PSU is operating normally
- *
- * Example:
- *
- *   current=10, power=15, voltage=unknown, state=normal
- *
- * This attribute must be queried through XNVCTRLQueryTargetStringAttribute()
- * using a NV_CTRL_TARGET_TYPE_VCSC target.
- *
+ * NV_CTRL_STRING_VCSC_PSU_INFO - Not supported
  */
 
-
-#define NV_CTRL_STRING_VCSC_PSU_INFO                           32   /* R---V */
+#define NV_CTRL_STRING_VCSC_PSU_INFO                           32
 
 
 /*
@@ -4551,37 +4495,14 @@
 
 
 /*
- * NV_CTRL_BINARY_DATA_GPUS_USING_VCSC - Deprecated
- *
- * Returns the list of GPU devices connected to the given VCS.
- *
- * The format of the returned data is:
- *
- *     4       CARD32 number of GPUs
- *     4 * n   CARD32 GPU indices
- *
- * This attribute can only be queried through XNVCTRLQueryTargetBinaryData()
- * using a NV_CTRL_TARGET_TYPE_VCSC target.  This attribute cannot be
- * queried using a NV_CTRL_TARGET_TYPE_X_SCREEN and cannot be queried using
- * a  NV_CTRL_TARGET_TYPE_X_GPU
+ * NV_CTRL_BINARY_DATA_GPUS_USING_VCSC - Not supported
  */
 
-#define NV_CTRL_BINARY_DATA_GPUS_USING_VCSC                    8   /* R-DV */
+#define NV_CTRL_BINARY_DATA_GPUS_USING_VCSC                    8
 
 
 /*
  * NV_CTRL_BINARY_DATA_VCSCS_USED_BY_GPU - Deprecated
- *
- * Returns the VCSC device that is controlling the given GPU.
- *
- * The format of the returned data is:
- *
- *     4       CARD32 number of VCS (always 1)
- *     4 * n   CARD32 VCS indices
- *
- * This attribute can only be queried through XNVCTRLQueryTargetBinaryData()
- * using a NV_CTRL_TARGET_TYPE_GPU target.  This attribute cannot be
- * queried using a NV_CTRL_TARGET_TYPE_X_SCREEN
  */
 
 #define NV_CTRL_BINARY_DATA_VCSCS_USED_BY_GPU                  9   /* R-DG */

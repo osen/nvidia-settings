@@ -243,7 +243,7 @@ typedef enum nvmlNvLinkUtilizationCountUnits_enum
     NVML_NVLINK_COUNTER_UNIT_CYCLES =  0,     // count by cycles
     NVML_NVLINK_COUNTER_UNIT_PACKETS = 1,     // count by packets
     NVML_NVLINK_COUNTER_UNIT_BYTES   = 2,     // count by bytes
-
+    NVML_NVLINK_COUNTER_UNIT_RESERVED = 3,    // count reserved for internal use
     // this must be last
     NVML_NVLINK_COUNTER_UNIT_COUNT
 } nvmlNvLinkUtilizationCountUnits_t;
@@ -715,6 +715,7 @@ typedef enum nvmlInforomObject_enum
  */
 typedef enum nvmlReturn_enum 
 {
+    // cppcheck-suppress *
     NVML_SUCCESS = 0,                   //!< The operation was successful
     NVML_ERROR_UNINITIALIZED = 1,       //!< NVML was not first initialized with nvmlInit()
     NVML_ERROR_INVALID_ARGUMENT = 2,    //!< A supplied argument is invalid
@@ -3059,6 +3060,32 @@ nvmlReturn_t DECLDIR nvmlDeviceSetDefaultAutoBoostedClocksEnabled(nvmlDevice_t d
  */
 nvmlReturn_t DECLDIR nvmlDeviceGetFanSpeed(nvmlDevice_t device, unsigned int *speed);
 
+
+/**
+ * Retrieves the intended operating speed of the device's specified fan.
+ *
+ * Note: The reported speed is the intended fan speed. If the fan is physically blocked and unable to spin, the
+ * output will not match the actual fan speed.
+ *
+ * For all discrete products with dedicated fans.
+ *
+ * The fan speed is expressed as a percentage of the maximum, i.e. full speed is 100%
+ *
+ * @param device                                The identifier of the target device
+ * @param fan                                   The index of the target fan, zero indexed.
+ * @param speed                                 Reference in which to return the fan speed percentage
+ *
+ * @return
+ *        - \ref NVML_SUCCESS                   if \a speed has been set
+ *        - \ref NVML_ERROR_UNINITIALIZED       if the library has not been successfully initialized
+ *        - \ref NVML_ERROR_INVALID_ARGUMENT    if \a device is invalid, \a fan is not an acceptable index, or \a speed is NULL
+ *        - \ref NVML_ERROR_NOT_SUPPORTED       if the device does not have a fan or is newer than Maxwell
+ *        - \ref NVML_ERROR_GPU_IS_LOST         if the target GPU has fallen off the bus or is otherwise inaccessible
+ *        - \ref NVML_ERROR_UNKNOWN             on any unexpected error
+ */
+nvmlReturn_t DECLDIR nvmlDeviceGetFanSpeed_v2(nvmlDevice_t device, unsigned int fan, unsigned int * speed);
+
+
 /**
  * Retrieves the current temperature readings for the device, in degrees C. 
  * 
@@ -4344,6 +4371,12 @@ nvmlReturn_t DECLDIR nvmlUnitSetLedState(nvmlUnit_t unit, nvmlLedColor_t color);
  *
  * See \ref nvmlEnableState_t for available modes.
  *
+ * After calling this API with mode set to NVML_FEATURE_DISABLED on a device that has its own NUMA
+ * memory, the given device handle will no longer be valid, and to continue to interact with this
+ * device, a new handle should be obtained from one of the nvmlDeviceGetHandleBy*() APIs. This
+ * limitation is currently only applicable to devices that have a coherent NVLink connection to
+ * system memory.
+ *
  * @param device                               The identifier of the target device
  * @param mode                                 The target persistence mode
  * 
@@ -5336,8 +5369,7 @@ nvmlReturn_t DECLDIR nvmlDeviceSetVirtualizationMode(nvmlDevice_t device, nvmlGp
  *         - \ref NVML_ERROR_INSUFFICIENT_SIZE      \a vgpuTypeIds buffer is too small, array element count is returned in \a vgpuCount
  *         - \ref NVML_ERROR_INVALID_ARGUMENT       if \a vgpuCount is NULL or \a device is invalid
  *         - \ref NVML_ERROR_NOT_SUPPORTED          if vGPU is not supported by the device
- *         - \ref NVML_ERROR_VGPU_ECC_NOT_SUPPORTED if ECC is enabled on the device
- *         - \ref NVML_ERROR_UNKNOWN             on any unexpected error
+ *         - \ref NVML_ERROR_UNKNOWN                on any unexpected error
  */
 nvmlReturn_t DECLDIR nvmlDeviceGetSupportedVgpus(nvmlDevice_t device, unsigned int *vgpuCount, nvmlVgpuTypeId_t *vgpuTypeIds);
 
@@ -5366,7 +5398,6 @@ nvmlReturn_t DECLDIR nvmlDeviceGetSupportedVgpus(nvmlDevice_t device, unsigned i
  *         - \ref NVML_ERROR_INSUFFICIENT_SIZE      \a vgpuTypeIds buffer is too small, array element count is returned in \a vgpuCount
  *         - \ref NVML_ERROR_INVALID_ARGUMENT       if \a vgpuCount is NULL
  *         - \ref NVML_ERROR_NOT_SUPPORTED          if vGPU is not supported by the device
- *         - \ref NVML_ERROR_VGPU_ECC_NOT_SUPPORTED if ECC is enabled on the device
  *         - \ref NVML_ERROR_UNKNOWN                on any unexpected error
  */
 nvmlReturn_t DECLDIR nvmlDeviceGetCreatableVgpus(nvmlDevice_t device, unsigned int *vgpuCount, nvmlVgpuTypeId_t *vgpuTypeIds);
@@ -5734,6 +5765,22 @@ nvmlReturn_t DECLDIR nvmlVgpuInstanceGetType(nvmlVgpuInstance_t vgpuInstance, nv
 nvmlReturn_t DECLDIR nvmlVgpuInstanceGetFrameRateLimit(nvmlVgpuInstance_t vgpuInstance, unsigned int *frameRateLimit);
 
 /**
+ * Retrieve the current ECC mode of vGPU instance.
+ *
+ * @param vgpuInstance            The identifier of the target vGPU instance
+ * @param eccMode                 Reference in which to return the current ECC mode
+ *
+ * @return
+ *         - \ref NVML_SUCCESS                 if the vgpuInstance's ECC mode has been successfully retrieved
+ *         - \ref NVML_ERROR_UNINITIALIZED     if the library has not been successfully initialized
+ *         - \ref NVML_ERROR_INVALID_ARGUMENT  if \a vgpuInstance is 0, or \a mode is NULL
+ *         - \ref NVML_ERROR_NOT_FOUND         if \a vgpuInstance does not match a valid active vGPU instance on the system
+ *         - \ref NVML_ERROR_NOT_SUPPORTED     if the vGPU doesn't support this feature
+ *         - \ref NVML_ERROR_UNKNOWN           on any unexpected error
+ */
+nvmlReturn_t DECLDIR nvmlVgpuInstanceGetEccMode(nvmlVgpuInstance_t vgpuInstance, nvmlEnableState_t *eccMode);
+
+/**
  * Retrieve the encoder capacity of a vGPU instance, as a percentage of maximum encoder capacity with valid values in the range 0-100.
  *
  * For Maxwell &tm; or newer fully supported devices.
@@ -6023,11 +6070,11 @@ nvmlReturn_t DECLDIR nvmlDeviceGetProcessUtilization(nvmlDevice_t device, nvmlPr
  *
  * For Maxwell &tm; or newer fully supported devices.
  *
- * @param vgpuInstance            The identifier of the target vGPU VM
+ * @param vgpuInstance            The identifier of the target vGPU instance
  * @param mode                    Reference in which to return the current accounting mode
  *
- * @return 
- *         - \ref NVML_SUCCESS                 if the mode has been successfully retrieved 
+ * @return
+ *         - \ref NVML_SUCCESS                 if the mode has been successfully retrieved
  *         - \ref NVML_ERROR_UNINITIALIZED     if the library has not been successfully initialized
  *         - \ref NVML_ERROR_INVALID_ARGUMENT  if \a vgpuInstance is 0, or \a mode is NULL
  *         - \ref NVML_ERROR_NOT_FOUND         if \a vgpuInstance does not match a valid active vGPU instance on the system
@@ -6037,24 +6084,24 @@ nvmlReturn_t DECLDIR nvmlDeviceGetProcessUtilization(nvmlDevice_t device, nvmlPr
 nvmlReturn_t DECLDIR nvmlVgpuInstanceGetAccountingMode(nvmlVgpuInstance_t vgpuInstance, nvmlEnableState_t *mode);
 
 /**
- * Queries list of processes running on vGPU that can be queried for accounting stats. The list of processes 
+ * Queries list of processes running on vGPU that can be queried for accounting stats. The list of processes
  * returned can be in running or terminated state.
  *
  * For Maxwell &tm; or newer fully supported devices.
- * 
+ *
  * To just query the maximum number of processes that can be queried, call this function with *count = 0 and
  * pids=NULL. The return code will be NVML_ERROR_INSUFFICIENT_SIZE, or NVML_SUCCESS if list is empty.
- * 
+ *
  * For more details see \ref nvmlVgpuInstanceGetAccountingStats.
  *
  * @note In case of PID collision some processes might not be accessible before the circular buffer is full.
  *
- * @param vgpuInstance            The identifier of the target vGPU VM
+ * @param vgpuInstance            The identifier of the target vGPU instance
  * @param count                   Reference in which to provide the \a pids array size, and
  *                                to return the number of elements ready to be queried
  * @param pids                    Reference in which to return list of process ids
- * 
- * @return 
+ *
+ * @return
  *         - \ref NVML_SUCCESS                 if pids were successfully retrieved
  *         - \ref NVML_ERROR_UNINITIALIZED     if the library has not been successfully initialized
  *         - \ref NVML_ERROR_INVALID_ARGUMENT  if \a vgpuInstance is 0, or \a count is NULL
@@ -6071,10 +6118,10 @@ nvmlReturn_t DECLDIR nvmlVgpuInstanceGetAccountingPids(nvmlVgpuInstance_t vgpuIn
  * Queries process's accounting stats.
  *
  * For Maxwell &tm; or newer fully supported devices.
- * 
+ *
  * Accounting stats capture GPU utilization and other statistics across the lifetime of a process, and
  * can be queried during life time of the process or after its termination.
- * The time field in \ref nvmlAccountingStats_t is reported as 0 during the lifetime of the process and 
+ * The time field in \ref nvmlAccountingStats_t is reported as 0 during the lifetime of the process and
  * updated to actual running time after its termination.
  * Accounting stats are kept in a circular buffer, newly created processes overwrite information about old
  * processes.
@@ -6087,11 +6134,11 @@ nvmlReturn_t DECLDIR nvmlVgpuInstanceGetAccountingPids(nvmlVgpuInstance_t vgpuIn
  *         queried since they don't contribute to GPU utilization.
  * @note In case of pid collision stats of only the latest process (that terminated last) will be reported
  *
- * @param vgpuInstance            The identifier of the target vGPU VM
+ * @param vgpuInstance            The identifier of the target vGPU instance
  * @param pid                     Process Id of the target process to query stats for
  * @param stats                   Reference in which to return the process's accounting stats
  *
- * @return 
+ * @return
  *         - \ref NVML_SUCCESS                 if stats have been successfully retrieved
  *         - \ref NVML_ERROR_UNINITIALIZED     if the library has not been successfully initialized
  *         - \ref NVML_ERROR_INVALID_ARGUMENT  if \a vgpuInstance is 0, or \a stats is NULL
@@ -6112,12 +6159,12 @@ nvmlReturn_t DECLDIR nvmlVgpuInstanceGetAccountingStats(nvmlVgpuInstance_t vgpuI
 /***************************************************************************************************/
 
 /**
- * Structure representing a range of vGPU version
+ * Structure representing range of vGPU versions.
  */
 typedef struct nvmlVgpuVersion_st
 {
-    unsigned int minVersion;         //!< Minimum vGPU version.
-    unsigned int maxVersion;         //!< Maximum vGPU version.
+    unsigned int minVersion; //!< Minimum vGPU version.
+    unsigned int maxVersion; //!< Maximum vGPU version.
 } nvmlVgpuVersion_t;
 
 /**
@@ -6191,7 +6238,7 @@ typedef struct nvmlVgpuPgpuCompatibility_st
  *
  * nvmlVgpuInstanceGetMetadata() may be called at any time for a vGPU instance. Some fields in the returned structure are
  * dependent on information obtained from the guest VM, which may not yet have reached a state where that information
- * is available. The current state of these dependent fields is reflected in the info structure's \ref guestInfoState field.
+ * is available. The current state of these dependent fields is reflected in the info structure's \ref nvmlVgpuGuestInfoState_t field.
  *
  * The VMM may choose to read and save the vGPU's VM info as persistent metadata associated with the VM, and provide
  * it to GRID Virtual GPU Manager when creating a vGPU for subsequent instances of the VM.
@@ -6260,40 +6307,81 @@ nvmlReturn_t DECLDIR nvmlDeviceGetVgpuMetadata(nvmlDevice_t device, nvmlVgpuPgpu
 nvmlReturn_t DECLDIR nvmlGetVgpuCompatibility(nvmlVgpuMetadata_t *vgpuMetadata, nvmlVgpuPgpuMetadata_t *pgpuMetadata, nvmlVgpuPgpuCompatibility_t *compatibilityInfo);
 
 /**
- * Returns the following two version range structures \ref nvmlVgpuVersion_t :
- * 1. \a supported : structure representing the range of vGPU versions supported by the host;
- * 2. \a current : structure representing the range of supported versions enforced by the caller via \ref nvmlSetVgpuVersion().
- * 
- * The caller pass in the pointer to the structures, into which the compatible ranges are written.
+ * Returns the properties of the physical GPU indicated by the device in an ascii-encoded string format.
  *
- * @note: 1. The guest driver will fail to load if the version is below the range returned in the \a current structure.
- *        2. If the guest driver is above the range, it will be downgraded to the current structure maximum version.
+ * The caller passes in a buffer via \a pgpuMetadata, with the size of the buffer in \a bufferSize. If the
+ * string is too large to fit in the supplied buffer, the function returns NVML_ERROR_INSUFFICIENT_SIZE with the size needed
+ * in \a bufferSize.
  *
- * @param supported              Pointer to caller-supplied structure into which the supported vGPU version range is returned
- * @param current                Pointer to caller-supplied structure into which the caller enforced supported vGPU version range is returned.
+ * @param device                The identifier of the target device
+ * @param pgpuMetadata          Pointer to caller-supplied buffer into which \a pgpuMetadata is written
+ * @param bufferSize            Pointer to size of \a pgpuMetadata buffer
  *
  * @return
- *         - \ref NVML_SUCCESS                   vGPU version range structure was successfully returned
- *         - \ref NVML_ERROR_NOT_SUPPORTED       API not supported
- *         - \ref NVML_ERROR_UNKNOWN             Error while getting the data
+ *         - \ref NVML_SUCCESS                   GPU metadata structure was successfully returned
+ *         - \ref NVML_ERROR_INSUFFICIENT_SIZE   \a pgpuMetadata buffer is too small, required size is returned in \a bufferSize
+ *         - \ref NVML_ERROR_INVALID_ARGUMENT    if \a bufferSize is NULL or \a device is invalid; if \a pgpuMetadata is NULL and the value of \a bufferSize is not 0.
+ *         - \ref NVML_ERROR_NOT_SUPPORTED       if vGPU is not supported by the system
+ *         - \ref NVML_ERROR_UNKNOWN             on any unexpected error
+ */
+nvmlReturn_t DECLDIR nvmlDeviceGetPgpuMetadataString(nvmlDevice_t device, char *pgpuMetadata, unsigned int *bufferSize);
+
+/*
+ * Virtual GPU (vGPU) version
+ *
+ * The NVIDIA vGPU Manager and the guest drivers are tagged with a range of supported vGPU versions. This determines the range of NVIDIA guest driver versions that
+ * are compatible for vGPU feature support with a given NVIDIA vGPU Manager. For vGPU feature support, the range of supported versions for the NVIDIA vGPU Manager 
+ * and the guest driver must overlap. Otherwise, the guest driver fails to load in the VM.
+ *
+ * When the NVIDIA guest driver loads, either when the VM is booted or when the driver is installed or upgraded, a negotiation occurs between the guest driver
+ * and the NVIDIA vGPU Manager to select the highest mutually compatible vGPU version. The negotiated vGPU version stays the same across VM migration.
+ */
+
+/**
+ * Query the ranges of supported vGPU versions.
+ *
+ * This function gets the linear range of supported vGPU versions that is preset for the NVIDIA vGPU Manager and the range set by an administrator.
+ * If the preset range has not been overridden by \ref nvmlSetVgpuVersion, both ranges are the same.
+ *
+ * The caller passes pointers to the following \ref nvmlVgpuVersion_t structures, into which the NVIDIA vGPU Manager writes the ranges:
+ * 1. \a supported structure that represents the preset range of vGPU versions supported by the NVIDIA vGPU Manager.
+ * 2. \a current structure that represents the range of supported vGPU versions set by an administrator. By default, this range is the same as the preset range.
+ *
+ * @param supported  Pointer to the structure in which the preset range of vGPU versions supported by the NVIDIA vGPU Manager is written
+ * @param current    Pointer to the structure in which the range of supported vGPU versions set by an administrator is written
+ *
+ * @return
+ * - \ref NVML_SUCCESS                 The vGPU version range structures were successfully obtained.
+ * - \ref NVML_ERROR_NOT_SUPPORTED     The API is not supported.
+ * - \ref NVML_ERROR_INVALID_ARGUMENT  The \a supported parameter or the \a current parameter is NULL.
+ * - \ref NVML_ERROR_UNKNOWN           An error occurred while the data was being fetched.
  */
 nvmlReturn_t DECLDIR nvmlGetVgpuVersion(nvmlVgpuVersion_t *supported, nvmlVgpuVersion_t *current);
 
 /**
- * Takes a vGPU version range structure \ref nvmlVgpuVersion_t and set the vGPU compatible version range to the one provided as input.
- * The caller should call the \ref nvmlGetVgpuVersion() to get the range of supported version by the host driver.
+ * Override the preset range of vGPU versions supported by the NVIDIA vGPU Manager with a range set by an administrator.
  *
- * @note: 1. The guest driver will fail to load if the version is below the range set via \a vgpuVersion structure. 
- *        2. If the guest driver is above the range, it will be downgraded to the \a vgpuVersion structure maximum version.
- *        3. This will result error if there are VMs already active on the host or the supported range being set is outside the range supported by host driver.
+ * This function configures the NVIDIA vGPU Manager with a range of supported vGPU versions set by an administrator. This range must be a subset of the
+ * preset range that the NVIDIA vGPU Manager supports. The custom range set by an administrator takes precedence over the preset range and is advertised to
+ * the guest VM for negotiating the vGPU version. See \ref nvmlGetVgpuVersion for details of how to query the preset range of versions supported.
  *
- * @param vgpuVersion          Pointer to caller-supplied vGPU supported version range.
+ * This function takes a pointer to vGPU version range structure \ref nvmlVgpuVersion_t as input to override the preset vGPU version range that the NVIDIA vGPU Manager supports.
+ *
+ * After host system reboot or driver reload, the range of supported versions reverts to the range that is preset for the NVIDIA vGPU Manager.
+ *
+ * @note 1. The range set by the administrator must be a subset of the preset range that the NVIDIA vGPU Manager supports. Otherwise, an error is returned.
+ *       2. If the range of supported guest driver versions does not overlap the range set by the administrator, the guest driver fails to load.
+ *       3. If the range of supported guest driver versions overlaps the range set by the administrator, the guest driver will load with a negotiated 
+ *          vGPU version that is the maximum value in the overlapping range.
+ *       4. No VMs must be running on the host when this function is called. If a VM is running on the host, the call to this function fails.
+ *
+ * @param vgpuVersion   Pointer to a caller-supplied range of supported vGPU versions.
  *
  * @return
- *         - \ref NVML_SUCCESS                   vGPU metadata structure was successfully returned
- *         - \ref NVML_ERROR_NOT_SUPPORTED       API not supported
- *         - \ref NVML_ERROR_IN_USE              Range not set as VM is running on the host
- *         - \ref NVML_ERROR_INVALID_ARGUMENT    Range being set is outside the range supported by host driver
+ * - \ref NVML_SUCCESS                 The preset range of supported vGPU versions was successfully overridden.
+ * - \ref NVML_ERROR_NOT_SUPPORTED     The API is not supported.
+ * - \ref NVML_ERROR_IN_USE            The range was not overridden because a VM is running on the host.
+ * - \ref NVML_ERROR_INVALID_ARGUMENT  The \a vgpuVersion parameter specifies a range that is outside the range supported by the NVIDIA vGPU Manager or if \a vgpuVersion is NULL.
  */
 nvmlReturn_t DECLDIR nvmlSetVgpuVersion(nvmlVgpuVersion_t *vgpuVersion);
 

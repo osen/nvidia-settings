@@ -20,6 +20,7 @@
 #ifndef __CTK_DISPLAYCONFIG_H__
 #define __CTK_DISPLAYCONFIG_H__
 
+
 #include "ctkevent.h"
 #include "ctkconfig.h"
 #include "ctkdisplaylayout.h"
@@ -97,6 +98,8 @@ typedef struct _CtkDisplayConfig
 
     GtkWidget *chk_forcecompositionpipeline_enabled;
     GtkWidget *chk_forcefullcompositionpipeline_enabled;
+
+    GtkWidget *chk_force_allow_gsync;
 
     GtkWidget *mnu_selected_item;
     SelectableItem *selected_item_table;

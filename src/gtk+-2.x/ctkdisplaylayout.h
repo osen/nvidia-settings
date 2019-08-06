@@ -20,6 +20,7 @@
 #ifndef __CTK_DISPLAYLAYOUT_H__
 #define __CTK_DISPLAYLAYOUT_H__
 
+
 #include "ctkevent.h"
 #include "ctkconfig.h"
 
@@ -227,6 +228,9 @@ typedef struct nvModeRec {
     Bool forceCompositionPipeline;
     Bool forceFullCompositionPipeline;
     Bool allowGSYNC;
+    Bool allowGSYNCCompatibleSpecified;
+    Bool allowGSYNCCompatible;
+    int vrrMinRefreshRate;
 
 } nvMode, *nvModePtr;
 
